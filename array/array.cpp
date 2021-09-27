@@ -31,14 +31,15 @@ int int_array::size() const {
     return size_;
 }
 
-int_array & int_array::operator=(int_array & other) {
-    if (&other != this) {
-        delete[] data_;
+int_array & int_array::operator=(int_array other) {
+    //if (this != &other) {
+        //delete[] data_;
+        std::swap(data_, other.data_);
         capacity_ = other.capacity_;
         size_ = other.size_;
-        data_ = new int[capacity_];
-        std::copy(other.data_, other.data_ + size_, data_);
-    }
+        //data_ = new int[capacity_];
+        //std::copy(other.data_, other.data_ + size_, data_);
+    //}
     return *this;
 }
 

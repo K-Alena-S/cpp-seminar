@@ -3,7 +3,7 @@ class int_array {
     explicit int_array(int capacity);
     int_array(int_array & other);
     ~int_array();
-    int_array & operator=(int_array & other);
+    int_array & operator=(int_array other);
     int push_back(int i);
     int at(int i);
     int pop_back();
