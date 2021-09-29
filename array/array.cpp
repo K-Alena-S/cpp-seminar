@@ -1,6 +1,5 @@
 #include "array.hpp"
 #include <cassert>
-#include <iostream>
 #include <algorithm>
 
 int_array::int_array(int capacity) : data_(new int[capacity]), capacity_(capacity) {}
@@ -47,21 +46,4 @@ int_array::int_array(int_array & other) : capacity_(other.capacity_),
                                          size_(other.size_),
                                          data_(new int[other.size_]) {
     std::copy(other.data_, other.data_ + size_, data_);
-}
-
-int main(int argc, char const * argv[]) {
-    int_array arr(10);
-    arr.push_back(13);
-    arr.push_back(42);
-    // 13
-    std::cout << arr.at(0) << std::endl;
-    // 42
-    std::cout << arr.pop_back() << std::endl;
-    // 1
-    std::cout << "Size: " << arr.size() << std::endl;
-    int_array arr2(4);
-    arr2 = arr;
-    // 13
-    std::cout << "First element: " << arr2.at(0) << std::endl;
-    return 0;
 }
