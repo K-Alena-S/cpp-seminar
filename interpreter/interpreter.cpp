@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdint>
+#include <cassert>
 
 
 class Command {
@@ -23,25 +24,25 @@ class Sub: public Command {
 };
 
 class Right: public Command {
-    void apply(const char * c, uint8_t * ptr) {
+    void apply(const char * c, uint8_t * ptr) override {
         ptr++;
     }
 };
 
 class Left: public Command {
-    void apply(const char * c, uint8_t * ptr) {
+    void apply(const char * c, uint8_t * ptr) override {
         ptr--;
     }
 };
 
 class Write: public Command {
-    void apply(const char * c, uint8_t * ptr) {
+    void apply(const char * c, uint8_t * ptr) override {
         std::cout << unsigned(*ptr) << std::endl;
     }
 };
 
 class Read: public Command {
-    void apply(const char * c, uint8_t * ptr) {
+    void apply(const char * c, uint8_t * ptr) override {
         std::cin >> (*ptr);
     }
 };
