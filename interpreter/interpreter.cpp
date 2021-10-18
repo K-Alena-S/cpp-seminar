@@ -1,54 +1,74 @@
 #include <iostream>
 #include <cstdint>
 #include <cassert>
+#include <vector>
+#include <algorithm>
 
 
 class Command {
  public:
-    virtual void apply(const char * c, uint8_t * ptr) {
-        std::cout << "Hello from command" << std::endl;
-    }
+    virtual void apply(uint8_t * ptr) = 0;
 };
 
 class Add: public Command {
-    void apply(const char * c, uint8_t * ptr) override {
+    void apply(uint8_t * ptr) override {
         (*ptr)++;
     }
 };
 
 class Sub: public Command {
-    void apply(const char * c, uint8_t * ptr) override {
-        std::cout << "Hello from sub" << std::endl;
-        // (*ptr)--;
+    void apply(uint8_t * ptr) override {
+        (*ptr)--;
     }
 };
 
 class Right: public Command {
-    void apply(const char * c, uint8_t * ptr) override {
+    void apply(uint8_t * ptr) override {
         ptr++;
     }
 };
 
 class Left: public Command {
-    void apply(const char * c, uint8_t * ptr) override {
+    void apply(uint8_t * ptr) override {
         ptr--;
     }
 };
 
 class Write: public Command {
-    void apply(const char * c, uint8_t * ptr) override {
+    void apply(uint8_t * ptr) override {
         std::cout << unsigned(*ptr) << std::endl;
     }
 };
 
 class Read: public Command {
-    void apply(const char * c, uint8_t * ptr) override {
+    void apply(uint8_t * ptr) override {
         std::cin >> (*ptr);
     }
 };
 
-Command * get_cmd(char c) {
-    switch (c) {
+class While: public Command {
+ public:
+    While(std::vector<Command *> cmds): _cmds(cmds) {}
+    void apply(uint8_t * ptr) override {
+        while (*ptr != 0) {
+            std::for_each(_cmds.begin(), _cmds.end(), [&ptr](Command * cmd){ cmd->apply(ptr); });
+        }
+    }
+ private:
+    std::vector<Command *> _cmds;
+};
+
+class Interpreter {
+ public:
+    void interpret(std::string & cmds);
+ private:
+    Command * get_cmd(const char * c);
+    uint8_t _data[100];
+    uint8_t * _ptr = _data;
+};
+
+Command * Interpreter::get_cmd(const char * c) {
+    switch (*c) {
         case '+':
             return new Add();
         case '-':
@@ -61,76 +81,35 @@ Command * get_cmd(char c) {
             return new Write();
         case ',':
             return new Read();
+        case '[': {
+            std::vector<Command *> cmds;
+            while (*c != ']' || *c != '\0') {
+                cmds.push_back(get_cmd(c));
+                c++;
+            }
+            assert(c != '\0');
+            return new While(cmds);
+        }
         default:
             assert(false);
     }
 }
 
-void interpret(const char * c, uint8_t * ptr) {
+void Interpreter::interpret(std::string & cmds) {
+    const char * c = cmds.c_str();
     while (*c != '\0') {
-        Command * command = get_cmd(*c);
-        command->apply(c, ptr);
-
-        // switch (*c) {
-        //     case '+':
-        //         (*ptr)++;
-        //         break;
-        //     case '-':
-        //         (*ptr)--;
-        //         break;
-        //     case '>':
-        //         ptr++;
-        //         break;
-        //     case '<':
-        //         ptr--;
-        //         break;
-        //     case '.':
-        //         std::cout << unsigned(*ptr) << std::endl;
-        //         break;
-        //     case ',':
-        //         std::cin >> (*ptr);
-        //         break;
-        //     // case '[':
-        //     //     if (*ptr != 0) break;
-        //     //     do {
-        //     //         c++;
-        //     //     } while (*c != ']' && *c != '\0');
-        //     //     assert(*c != '\0');
-        //     //     break;
-        //     // case ']':
-        //     //     if (*ptr == 0) break;
-        //     //     // TODO: handle no [
-        //     //     do {
-        //     //         c--;
-        //     //     } while (*c != '[');
-        //     //     break;
-        //     default:
-        //         assert(false);
-        // }
+        Command * command = get_cmd(c);
+        command->apply(_ptr);
         c++;
     }
 }
 
 int main(int argc, char const *argv[]) {
-    Sub s = Sub();
-    Command * sub = &s;
-    char c = 'c';
-    uint8_t data[100] = {};
-    // sub->apply(&c, data);
-    size_t vptr = *(size_t *) sub;
-    typedef void (*apply_t) (const char * c, uint8_t * ptr);
-    apply_t func = *(apply_t *) vptr;
-    func(&c, data);
-
-
-    // std::string cmds;
-    // uint8_t data[100] = {};
-    // uint8_t * ptr = data;
-    // while (true) {
-    //     std::cin >> cmds;
-    //     const char * s = cmds.c_str();
-    //     const char * c = s;
-    //     interpret(c, ptr);
-    // }
+    std::string cmds;
+    Interpreter interpreter;
+    while (true) {
+        std::cin >> cmds;
+        interpreter.interpret(cmds);
+    }
     return 0;
 }
