@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(inbrain)
 
-add_executable(inbrain interpreter.cpp)
+add_executable(inbrain interpreter.cpp command.hpp main.cpp data_it.hpp interpreter_error.hpp)
 
 set_target_properties(
   inbrain
