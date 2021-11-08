@@ -3,7 +3,7 @@
 
 int main(int argc, char const *argv[]) {
     std::string cmds;
-    Interpreter interpreter;
+    Interpreter interpreter = Interpreter::getInstance();
     while (true) {
         std::cout << "> ";
         std::cin >> cmds;
