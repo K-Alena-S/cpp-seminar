@@ -43,7 +43,7 @@ class BaseBox {
 };
 
 template<typename T>
-class Box{
+class Box {
  public:
     Box(T t) {}
 };
@@ -116,12 +116,13 @@ void test(bool b) {
     my_unique_ptr<A, default_deleter<A>> ptr1(new A(), default_deleter<A>());
     // 2. type
     std::unique_ptr<A> sptr2(new A());
+    // my_unique_ptr<A> ptr2(new A());
     // // 3. array type
     // std::unique_ptr<A[]> sptr2(new A[1]());
-    // my_unique_ptr<A[]> ptr2(new A[1]());
+    // my_unique_ptr<A[]> ptr3(new A[1]());
     // // 4. array type + custom deleter
     // std::unique_ptr<A[], default_deleter<A>> sptr2(new A[1](), default_deleter<A>());
-    // my_unique_ptr<A[], default_deleter<A>> ptr2(new A[1](), default_deleter<A>());
+    // my_unique_ptr<A[], default_deleter<A>> ptr4(new A[1](), default_deleter<A>());
     
     //  (*ptr).inc();
     //  ptr->inc();
