@@ -11,10 +11,10 @@ class A {
 };
 
 template<typename T, typename TDeleter>
-class my_unique_ptr {
+class base_my_unique_ptr {
  public:
-    my_unique_ptr(T * ptr, TDeleter deleter): _ptr(ptr), _deleter(deleter) {}
-    ~my_unique_ptr() { if (_ptr != nullptr) _deleter(_ptr); }
+    base_my_unique_ptr(T * ptr, TDeleter deleter): _ptr(ptr), _deleter(deleter) {}
+    ~base_my_unique_ptr() { if (_ptr != nullptr) _deleter(_ptr); }
     T & operator*() { return *_ptr; }
     T * operator->() { return _ptr; }
     T * release() {
@@ -28,47 +28,11 @@ class my_unique_ptr {
         if (cur != nullptr) _deleter(cur);
     }
  private:
-    my_unique_ptr(my_unique_ptr & other) = delete;
-    my_unique_ptr & operator=(my_unique_ptr &) = delete;
+    base_my_unique_ptr(base_my_unique_ptr & other) = delete;
+    base_my_unique_ptr & operator=(base_my_unique_ptr &) = delete;
     T * _ptr;
     TDeleter _deleter;
 };
-
-template<typename T>
-class BaseBox {
- public:
-    BaseBox(T t) {
-    }
-    void foo() {}
-};
-
-template<typename T>
-class Box {
- public:
-    Box(T t) {}
-};
-
-template<>
-class Box<int>: public BaseBox<int> {
- public:
-    Box(int i): BaseBox<int>(i) {}
-};
-
-template<typename T>
-class Box<T[]>: public BaseBox<T[]> {
- public:
-    Box(T t[]): BaseBox<T[]>(t) {}
-};
-
-void testBox() {
-    int i[] = {1, 2, 3};
-    int ii = 42;
-    Box<int[]> b1(i);
-    b1.foo();
-    Box<int> b2(ii);
-    b2.foo();
-    Box<double> b3(41.0);
-}
 
 template<typename T>
 class default_deleter {
@@ -86,20 +50,31 @@ class array_deleter {
     }
 };
 
-bool foo() {
-    // may throw exception
-    return true;
-}
+// 1. T
+// 2. T + TDeleter
+template<typename T, typename TDeleter=default_deleter<T>>
+class my_unique_ptr: public base_my_unique_ptr<T, TDeleter> {
+ public:
+    my_unique_ptr(T * t, TDeleter deleter=TDeleter()): base_my_unique_ptr<T, TDeleter>(t, deleter) {}
+};
 
-void bar(std::unique_ptr<A> a, bool b) {}
+// 3. T[]
+template<typename T>
+class my_unique_ptr<T[]>: public base_my_unique_ptr<T, array_deleter<T>> {
+ public:
+    my_unique_ptr(T * t): base_my_unique_ptr<T, array_deleter<T>>(t, array_deleter<T>()) {}
+};
+
+// 4. T[] + TDeleter
+template<typename T, typename TDeleter>
+class my_unique_ptr<T[], TDeleter>: public base_my_unique_ptr<T, TDeleter> {
+ public:
+    my_unique_ptr(T * t, TDeleter deleter=TDeleter()): base_my_unique_ptr<T, TDeleter>(t, deleter) {}
+};
 
 template<typename T>
 my_unique_ptr<T, default_deleter<T>> make_my_unique() {
     return my_unique_ptr(new T(), default_deleter<T>());
-}
-
-void callBar() {
-    bar(std::make_unique<A>(), foo());
 }
 
 void test(bool b) {
@@ -112,17 +87,18 @@ void test(bool b) {
 
 
     // 1. type + custom deleter
-    std::unique_ptr<A, default_deleter<A>> sptr1(new A(), default_deleter<A>());
+    // std::unique_ptr<A, default_deleter<A>> sptr1(new A(), default_deleter<A>());
     my_unique_ptr<A, default_deleter<A>> ptr1(new A(), default_deleter<A>());
     // 2. type
-    std::unique_ptr<A> sptr2(new A());
-    // my_unique_ptr<A> ptr2(new A());
+    // std::unique_ptr<A> sptr2(new A());
+    my_unique_ptr<A> ptr2(new A());
     // // 3. array type
     // std::unique_ptr<A[]> sptr2(new A[1]());
-    // my_unique_ptr<A[]> ptr3(new A[1]());
+    A * a_arr = new A[1]();
+    my_unique_ptr<A[]> ptr3(a_arr);
     // // 4. array type + custom deleter
     // std::unique_ptr<A[], default_deleter<A>> sptr2(new A[1](), default_deleter<A>());
-    // my_unique_ptr<A[], default_deleter<A>> ptr4(new A[1](), default_deleter<A>());
+    my_unique_ptr<A[], array_deleter<A>> ptr4(new A[1](), array_deleter<A>());
     
     //  (*ptr).inc();
     //  ptr->inc();
