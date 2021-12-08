@@ -5,8 +5,10 @@ class int_array {
  public:
     explicit int_array(int capacity);
     int_array(const int_array & other);
+    int_array(int_array && other);
     ~int_array();
-    int_array & operator=(int_array other);
+    int_array & operator=(int_array & other);
+    int_array & operator=(int_array && other);
     int push_back(int i);
     int at(int i);
     // Removes element from array

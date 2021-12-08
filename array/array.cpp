@@ -34,17 +34,28 @@ int int_array::size() const {
     return size_;
 }
 
-int_array & int_array::operator=(int_array other) {
+int_array & int_array::operator=(int_array & other) {
     std::cout << "op=" << std::endl;
-    //if (this != &other) {
-        //delete[] data_;
-        std::swap(data_, other.data_);
+    if (this != &other) {
+        delete[] data_;
+        data_ = new int[capacity_];
         capacity_ = other.capacity_;
         size_ = other.size_;
-        //data_ = new int[capacity_];
-        //std::copy(other.data_, other.data_ + size_, data_);
-    //}
+        std::copy(other.data_, other.data_ + size_, data_);
+    }
     return *this;
+}
+
+int_array & int_array::operator=(int_array && other) {
+    std::swap(data_, other.data_);
+    std::swap(capacity_, other.capacity_);
+    std::swap(size_, other.size_);
+}
+
+void swap(int_array & a, int_array & b) {
+    int_array tmp = std::move(a);
+    a = std::move(b);
+    b = std::move(tmp);
 }
 
 int_array::int_array(const int_array & other) : capacity_(other.capacity_),
@@ -54,12 +65,30 @@ int_array::int_array(const int_array & other) : capacity_(other.capacity_),
     std::copy(other.data_, other.data_ + size_, data_);
 }
 
-// int_array::stealing_ctor(const int_array & other): capacity_(other.capacity_),
-//                                          size_(other.size_), {
-//     data_ = other.data_;
-//     other.data_ = nullptr;
-//     other.size_ = 0;
-// }
+int_array::int_array(int_array && other): capacity_(other.capacity_), size_(other.size_), data_(other.data_) {
+    std::cout << "movector" << std::endl;
+    other.data_ = nullptr;
+    other.size_ = 0;
+}
+
+void foo(int_array & a) {
+    
+}
+
+void foo(const int_array & a) {
+}
+
+void foo(int_array && a) {
+
+}
+
+void callFoo() {
+    // tmp object
+    foo(range(1, 10));
+    // stack object
+    int_array a(4);
+    foo(a);
+}
 
 int_array int_array::zero() {
     static int_array ZERO(0);
