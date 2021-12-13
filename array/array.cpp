@@ -2,9 +2,14 @@
 #include <cassert>
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 int_array::int_array(int capacity) : data_(new int[capacity]), capacity_(capacity) {
     std::cout << "ctor" << std::endl;
+}
+
+int_array::int_array(std::initializer_list<int> list): data_(new int[list.size()]), capacity_(list.size()), size_(list.size()) {
+    std::copy(list.begin(), list.end(), data_);
 }
 
 int_array::~int_array() {
@@ -50,6 +55,7 @@ int_array & int_array::operator=(int_array && other) {
     std::swap(data_, other.data_);
     std::swap(capacity_, other.capacity_);
     std::swap(size_, other.size_);
+    return *this;
 }
 
 void swap(int_array & a, int_array & b) {
@@ -69,25 +75,6 @@ int_array::int_array(int_array && other): capacity_(other.capacity_), size_(othe
     std::cout << "movector" << std::endl;
     other.data_ = nullptr;
     other.size_ = 0;
-}
-
-void foo(int_array & a) {
-    
-}
-
-void foo(const int_array & a) {
-}
-
-void foo(int_array && a) {
-
-}
-
-void callFoo() {
-    // tmp object
-    foo(range(1, 10));
-    // stack object
-    int_array a(4);
-    foo(a);
 }
 
 int_array int_array::zero() {
@@ -114,7 +101,10 @@ int main(int argc, char const *argv[]) {
     // rvalue, lvalue
     // int_array iarr = arr1;
     // some code with arr1
-    int_array iarr = range(1, 11);
+    int_array i = {1,2,3};
+    std::cout << i.at(2) << std::endl;
+    // move
+    // iarr = std::move(barr);
     // here
     return 0;
 }
